@@ -3,13 +3,15 @@ import { serve } from "@hono/node-server";
 import { env } from "@codepulse/config";
 import { errorHandler } from "./src/middleware/error-handler";
 import { requestLogger } from "./src/middleware/request-logger";
-
+import { authRoutes } from "./src/modules/auth/auth.routes";
 const app = new Hono();
 
 
 app.use("*", requestLogger);
 app.use("*", errorHandler);
 
+
+app.route("/api/auth", authRoutes);
 
 
 

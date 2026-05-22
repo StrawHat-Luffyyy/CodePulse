@@ -9,7 +9,13 @@
     "outDir": "./dist",
     "resolveJsonModule": true,
     "declaration": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "noEmit": true,
+    "rootDir": "../../",
+    "paths": {
+      "@codepulse/db": ["../../packages/db/src/index.ts"],
+      "@codepulse/config": ["../../packages/config/src/index.ts"]
+    }
   },
   "exclude": ["node_modules", "dist"]
 }
