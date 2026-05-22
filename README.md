@@ -72,7 +72,7 @@ Dashboard updated
 
 ## Screenshots
 
-> *Add your screenshots here. Recommended: dashboard view, a PR with comments, BullBoard queue dashboard.*
+> 
 
 | Dashboard | PR Review | Queue Monitor |
 |-----------|-----------|---------------|
