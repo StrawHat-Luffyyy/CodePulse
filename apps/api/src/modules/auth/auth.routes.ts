@@ -7,11 +7,11 @@ import { z } from "zod";
 const authRoutes = new Hono();
 
 const syncUserSchema = z.object({
-  githubId: z.string(),
-  username: z.string(),
+  githubId: z.string().min(1, "githubId is required"),
+  username: z.string().min(1, "username is required"),
   email: z.string().email().optional(),
   avatarUrl: z.string().url().optional(),
-  accessToken: z.string(),
+  accessToken: z.string().min(1, "accessToken is required"),
 });
 
 authRoutes.post("/sync", async (c) => {
@@ -42,7 +42,7 @@ authRoutes.post("/sync", async (c) => {
   });
   logger.info(
     { userId: user.id, username: user.username },
-    "User synced successfully",
+    "User synced",
   );
   return c.json({ userId: user.id });
 });

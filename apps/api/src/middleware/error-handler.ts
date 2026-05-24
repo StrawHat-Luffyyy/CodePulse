@@ -22,9 +22,10 @@ export async function errorHandler(c: Context, next: Next) {
     }
     if (error instanceof AppError) {
       logger.warn({ err: error, code: error.code }, "Application error");
+      const status = error.statusCode as 400 | 401 | 403 | 404 | 409 | 422 | 500;
       return c.json(
         { error: error.message, code: error.code },
-        error.statusCode as any,
+        status,
       );
     }
     logger.error({ err: error }, "Unhandled error");

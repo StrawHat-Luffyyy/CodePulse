@@ -6,6 +6,9 @@
   "private": true,
   "workspaces": ["apps/*", "packages/*"],
   "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
