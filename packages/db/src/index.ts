@@ -1,18 +1,46 @@
-import {PrismaClient} from '../generated/prisma/client.js'
-import 'dotenv/config'
+import "dotenv/config";
+import { PrismaClient } from "../generated/prisma/client.js";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
+
+if (!process.env.DATABASE_URL) {
+  throw new Error("DATABASE_URL environment variable is not set.");
+}
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  max: 10,
+  idleTimeoutMillis: 30_000,
+  connectionTimeoutMillis: 5_000,
+});
+
+const adapter = new PrismaPg(pool);
+function createPrismaClient(): PrismaClient {
+  return new PrismaClient({
+    adapter,
+    log:
+      process.env.NODE_ENV === "development"
+        ? ["query", "error", "warn"]
+        : ["error"],
+  });
+}
 
 declare global {
-var __prisma: PrismaClient | undefined
+  var __prisma: PrismaClient | undefined;
 }
 
-declare const process: any
+export const db: PrismaClient = globalThis.__prisma ?? createPrismaClient();
 
-export const db = globalThis.__prisma || new PrismaClient({
-  datasourceUrl: process.env.DATABASE_URL,
-  log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
-} as any)
-if (process.env.NODE_ENV !== 'production') {
-  globalThis.__prisma = db
+if (process.env.NODE_ENV !== "production") {
+  globalThis.__prisma = db;
 }
 
-export * from '../generated/prisma/client.js'
+async function shutdown(): Promise<void> {
+  await db.$disconnect();
+  await pool.end();
+}
+
+process.once("beforeExit", shutdown);
+process.once("SIGINT", shutdown);
+process.once("SIGTERM", shutdown);
+
+export * from "../generated/prisma/client.js";

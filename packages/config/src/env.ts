@@ -1,3 +1,9 @@
+import dotenv from "dotenv";
+import path from "path";
+
+// Load .env from the workspace root
+dotenv.config({ path: path.resolve(process.cwd(), ".env") });
+
 import { z } from "zod";
 
 const envSchema = z.object({
