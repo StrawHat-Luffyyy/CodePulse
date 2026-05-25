@@ -22,7 +22,7 @@ const envSchema = z.object({
   //Github OAuth
   GITHUB_CLIENT_ID: z.string().optional(),
   GITHUB_CLIENT_SECRET: z.string().optional(),
-  GITHUB_WEBHOOK_SECRET: z.string().optional(),
+  GITHUB_WEBHOOK_SECRET: z.string().min(20, 'Webhook secret must be at least 20 characters'),
 
   //OpenAI
   OPENAI_API_KEY: z.string().optional(),

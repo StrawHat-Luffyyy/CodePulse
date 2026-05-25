@@ -11,13 +11,14 @@ import { requestLogger } from "./src/middleware/request-logger";
 import { authRoutes } from "./src/modules/auth/auth.routes";
 import { logger } from "./src/lib/logger";
 import { HTTPException } from "hono/http-exception";
+import { webhookRoutes } from "./src/modules/webhooks/webhook.routes";
 
 const app = new Hono();
 
 app.use("*", requestLogger);
 
 app.route("/api/auth", authRoutes);
-
+app.route('/api/webhooks', webhookRoutes)
 app.get("/health", (c) =>
   c.json({
     status: "ok",
@@ -26,7 +27,7 @@ app.get("/health", (c) =>
   }),
 );
 
-// Hono's onError is the correct way to handle errors from route handlers
+
 app.onError((error, c) => {
   if (error instanceof HTTPException) {
     return c.json({ error: error.message, code: "HTTP_ERROR" }, error.status);
