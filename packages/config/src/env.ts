@@ -13,6 +13,7 @@ const envSchema = z.object({
     .default("development"),
   PORT: z.string().default("3001").transform(Number),
 
+  PUBLIC_API_URL: z.string().url("PUBLIC_API_URL must be a valid URL"),
   //Database
   DATABASE_URL: z.string().url("DATABASE_URL must be a valid URL"),
 
