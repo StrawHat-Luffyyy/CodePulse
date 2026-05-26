@@ -12,13 +12,14 @@ import { authRoutes } from "./src/modules/auth/auth.routes";
 import { logger } from "./src/lib/logger";
 import { HTTPException } from "hono/http-exception";
 import { webhookRoutes } from "./src/modules/webhooks/webhook.routes";
+import { startWebhookWorker } from "./src/workers/webhook.worker";
 
 const app = new Hono();
 
 app.use("*", requestLogger);
 
 app.route("/api/auth", authRoutes);
-app.route('/api/webhooks', webhookRoutes)
+app.route("/api/webhooks", webhookRoutes);
 app.get("/health", (c) =>
   c.json({
     status: "ok",
@@ -26,7 +27,6 @@ app.get("/health", (c) =>
     timestamp: new Date().toISOString(),
   }),
 );
-
 
 app.onError((error, c) => {
   if (error instanceof HTTPException) {
@@ -43,6 +43,9 @@ app.onError((error, c) => {
   return c.json({ error: "Internal server error" }, 500);
 });
 
+startWebhookWorker();
+logger.info("BullMQ worker started");
+
 serve({ fetch: app.fetch, port: env.PORT }, (info) => {
-  console.log(`API Server is running on http://localhost:${info.port}`);
+  logger.info(`API Server is running on http://localhost:${info.port}`);
 });
