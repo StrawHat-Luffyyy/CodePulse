@@ -12,6 +12,8 @@
   "license": "ISC",
   "packageManager": "pnpm@10.33.2",
   "dependencies": {
+    "@bull-board/api": "^7.1.5",
+    "@bull-board/hono": "^7.1.5",
     "@codepulse/config": "workspace:*",
     "@codepulse/db": "workspace:*",
     "@hono/node-server": "^2.0.2",

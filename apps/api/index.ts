@@ -13,6 +13,7 @@ import { logger } from "./src/lib/logger";
 import { HTTPException } from "hono/http-exception";
 import { webhookRoutes } from "./src/modules/webhooks/webhook.routes";
 import { startWebhookWorker } from "./src/workers/webhook.worker";
+import { createBullBoardAdapter } from "./src/lib/bullboard";
 
 const app = new Hono();
 
@@ -42,6 +43,8 @@ app.onError((error, c) => {
   logger.error({ err: error }, "Unhandled error");
   return c.json({ error: "Internal server error" }, 500);
 });
+const bullBoardAdapter = createBullBoardAdapter();
+app.route("/admin/queues", bullBoardAdapter.registerPlugin());
 
 startWebhookWorker();
 logger.info("BullMQ worker started");
