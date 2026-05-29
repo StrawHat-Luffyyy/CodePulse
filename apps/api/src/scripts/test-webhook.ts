@@ -20,8 +20,8 @@ const fakePayload = {
     id: 789,
     name: 'codepulse',
     full_name: 'StrawHat-Luffyyy/codepulse',
-    owner: {                          // ← ADD THIS
-      login: 'StrawHat-Luffyyy',      // ← your GitHub username
+    owner: {
+      login: 'StrawHat-Luffyyy',
     },
   },
 }

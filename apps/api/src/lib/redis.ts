@@ -1,5 +1,6 @@
 import { Redis } from "ioredis";
 import { env } from "@codepulse/config";
+import { logger } from "./logger";
 
 export function getRedisConnectionOptions() {
   const url = new URL(env.REDIS_URL);
@@ -17,4 +18,4 @@ export const redis = new Redis(env.REDIS_URL, {
   lazyConnect: true,
 });
 
-redis.on("error", (err) => console.error("Redis client error:", err));
+redis.on("error", (err) => logger.error({ err }, "Redis client error"));

@@ -75,10 +75,10 @@ export async function processWebhookJob(data: {
   });
   logger.info(
     { prId: pullRequest.id, number: pr.number },
-    "PR record created, beginning review",
+    "PR record upserted",
   );
   // TODO: Fetch diff and run AI review
-  // For now, simulataing processing
+  // For now, simulating processing
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
   await db.pullRequest.update({
@@ -86,5 +86,5 @@ export async function processWebhookJob(data: {
     data: { status: "COMPLETED" },
   });
 
-  logger.info({ prId: pullRequest.id }, "Review completed (stub)");
+  logger.info({ prId: pullRequest.id }, "Review stub completed");
 }

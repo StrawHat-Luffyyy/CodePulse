@@ -1,5 +1,6 @@
 import { Queue } from "bullmq";
 import { getRedisConnectionOptions } from "../lib/redis";
+import { logger } from "../lib/logger";
 
 export const webhookQueue = new Queue("webhook-processing", {
   connection: getRedisConnectionOptions(),
@@ -15,5 +16,5 @@ export const webhookQueue = new Queue("webhook-processing", {
 });
 
 webhookQueue.on("error", (error: Error) => {
-  console.error("Queue error:", error);
+  logger.error({ err: error }, "Queue error");
 });

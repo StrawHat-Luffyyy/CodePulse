@@ -50,15 +50,15 @@ app.route("/admin/queues", bullBoardAdapter.registerPlugin());
 
 const worker = startWebhookWorker();
 logger.info("BullMQ worker started");
+logger.info(`Queue dashboard: http://localhost:${env.PORT}/admin/queues`);
 
 serve({ fetch: app.fetch, port: env.PORT }, (info) => {
   logger.info(`API Server is running on http://localhost:${info.port}`);
 });
 
 const shutdown = async (signal: string) => {
-  logger.info(`${signal}received - shutting down gracefully`);
+  logger.info(`${signal} received — shutting down gracefully`);
 
-  const worker = startWebhookWorker();
   await worker.close();
   await webhookQueue.close();
   await redis.quit();
@@ -66,5 +66,5 @@ const shutdown = async (signal: string) => {
   process.exit(0);
 };
 
-process.on("SIGTERM", () => shutdown("SIGTERM "));
-process.on("SIGINT", () => shutdown("SIGINT "));
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("SIGINT", () => shutdown("SIGINT"));

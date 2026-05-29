@@ -47,8 +47,24 @@ repoRoutes.post("/:repoFullName/connect", authenticate, async (c) => {
   const user = c.get("user");
   const repoFullName = c.req.param("repoFullName")?.replace("_", "/");
 
-  //Register Webhook on Github
   const [owner, repo] = repoFullName?.split("/") || [];
+
+  // Fetch the actual GitHub repo to get its real ID
+  const repoResponse = await fetch(
+    `https://api.github.com/repos/${owner}/${repo}`,
+    {
+      headers: {
+        Authorization: `Bearer ${user.accessToken}`,
+        Accept: "application/vnd.github.v3+json",
+      },
+    },
+  );
+  if (!repoResponse.ok) {
+    throw new AppError("Failed to fetch repository from GitHub", 502);
+  }
+  const repoData = await repoResponse.json();
+
+  // Register Webhook on Github
   const webhookResponse = await fetch(
     `https://api.github.com/repos/${owner}/${repo}/hooks`,
     {
@@ -75,10 +91,10 @@ repoRoutes.post("/:repoFullName/connect", authenticate, async (c) => {
   }
   const webhook = await webhookResponse.json();
   await db.repository.upsert({
-    where: { githubRepoId: String(webhook.id) },
+    where: { githubRepoId: String(repoData.id) },
     update: { isActive: true, webhookId: String(webhook.id) },
     create: {
-      githubRepoId: String(webhook.id),
+      githubRepoId: String(repoData.id),
       ownerId: user.id,
       fullName: repoFullName!,
       name: repo!,
