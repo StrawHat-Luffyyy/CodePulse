@@ -6,14 +6,16 @@ dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 import { Hono } from "hono";
 import { serve } from "@hono/node-server";
 import { env } from "@codepulse/config";
-import { AppError } from "./src/middleware/error-handler";
-import { requestLogger } from "./src/middleware/request-logger";
-import { authRoutes } from "./src/modules/auth/auth.routes";
-import { logger } from "./src/lib/logger";
+import { AppError } from "./middleware/error-handler";
+import { requestLogger } from "./middleware/request-logger";
+import { authRoutes } from "./modules/auth/auth.routes";
+import { logger } from "./lib/logger";
 import { HTTPException } from "hono/http-exception";
-import { webhookRoutes } from "./src/modules/webhooks/webhook.routes";
-import { startWebhookWorker } from "./src/workers/webhook.worker";
-import { createBullBoardAdapter } from "./src/lib/bullboard";
+import { webhookRoutes } from "./modules/webhooks/webhook.routes";
+import { startWebhookWorker } from "./workers/webhook.worker";
+import { createBullBoardAdapter } from "./lib/bullboard";
+import { webhookQueue } from "./queues/webhook.queue";
+import { redis } from "./lib/redis";
 
 const app = new Hono();
 
@@ -46,9 +48,23 @@ app.onError((error, c) => {
 const bullBoardAdapter = createBullBoardAdapter();
 app.route("/admin/queues", bullBoardAdapter.registerPlugin());
 
-startWebhookWorker();
+const worker = startWebhookWorker();
 logger.info("BullMQ worker started");
 
 serve({ fetch: app.fetch, port: env.PORT }, (info) => {
   logger.info(`API Server is running on http://localhost:${info.port}`);
 });
+
+const shutdown = async (signal: string) => {
+  logger.info(`${signal}received - shutting down gracefully`);
+
+  const worker = startWebhookWorker();
+  await worker.close();
+  await webhookQueue.close();
+  await redis.quit();
+  logger.info("Shutdown complete");
+  process.exit(0);
+};
+
+process.on("SIGTERM", () => shutdown("SIGTERM "));
+process.on("SIGINT", () => shutdown("SIGINT "));
