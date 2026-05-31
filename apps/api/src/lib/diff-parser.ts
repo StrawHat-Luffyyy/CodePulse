@@ -17,16 +17,55 @@ const LANGUAGE_MAP: Record<string, string> = {
   go: "Go",
   rs: "Rust",
   rb: "Ruby",
+  cs: "C#",
+  cpp: "C++",
+  c: "C",
+  php: "PHP",
+  swift: "Swift",
+  kt: "Kotlin",
+  md: "Markdown",
+  json: "JSON",
+  yaml: "YAML",
+  yml: "YAML",
+  sql: "SQL",
+  sh: "Shell",
+  css: "CSS",
+  html: "HTML",
 };
+
+const LOCK_FILES = [
+  ".min.js",
+  ".min.css",
+  "dist/",
+  "build/",
+  ".next/",
+  "generated/",
+];
+
+const GENERATED_FILES = [
+  ".min.js",
+  ".min.css",
+  "dist/",
+  "build/",
+  ".next/",
+  "generated/",
+];
 
 function detectLanguage(filename: string): string {
   const ext = filename.split(".").pop()?.toLowerCase() ?? "";
   return LANGUAGE_MAP[ext] ?? "Unknown";
 }
+
+function shouldSkipFile(filename: string): boolean {
+  if (LOCK_FILES.some((lf) => filename.endsWith(lf))) return true;
+  if (GENERATED_FILES.some((gf) => filename.includes(gf))) return true;
+  return false;
+}
+
 export function parseDiff(files: any[]): ParsedFile[] {
   return files
     .filter((f) => f.patch && f.status !== "removed")
-    .filter((f) => !isLockFile(f.filename))
+    .filter((f) => !shouldSkipFile(f.filename))
     .map((f) => ({
       filename: f.filename,
       status: f.status,
@@ -35,16 +74,6 @@ export function parseDiff(files: any[]): ParsedFile[] {
       patch: f.patch,
       language: detectLanguage(f.filename),
     }));
-}
-
-function isLockFile(filename: string): boolean {
-  const lockFiles = [
-    "package-lock.json",
-    "yarn.lock",
-    "pnpm-lock.yaml",
-    "Gemfile.lock",
-  ];
-  return lockFiles.some((lf) => filename.endsWith(lf));
 }
 
 // Token estimation (rough: 1 token ≈ 4 characters)
@@ -61,9 +90,17 @@ export function truncateDiff(
   const result: ParsedFile[] = [];
   for (const file of files) {
     const fileTokens = estimateTokens(file.patch);
-    if (totalTokens + fileTokens > maxTokens) break;
-    result.push(file);
-    totalTokens += fileTokens;
+    if (fileTokens > 3000) {
+      const truncatePatch =
+        file.patch.substring(0, 3000 * 4) + "\n... [truncated]";
+      result.push({ ...file, patch: truncatePatch });
+      totalTokens += 3000;
+      continue;
+    }
+    if (totalTokens + fileTokens > maxTokens) {
+      result.push(file);
+      totalTokens += fileTokens;
+    }
   }
   return result;
 }
