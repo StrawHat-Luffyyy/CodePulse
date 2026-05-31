@@ -26,8 +26,9 @@ const envSchema = z.object({
   GITHUB_WEBHOOK_SECRET: z.string().min(20, 'Webhook secret must be at least 20 characters'),
 
   //OpenAI
-  OPENAI_API_KEY: z.string().optional(),
+  OPENAI_API_KEY: z.string().startsWith("sk-" , "OPENAI_API_KEY must start with 'sk-'"),
 });
+
 
 type EnvSchema = z.infer<typeof envSchema>;
 
